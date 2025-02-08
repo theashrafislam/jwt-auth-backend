@@ -40,11 +40,12 @@ async function run() {
             if (!token) {
                 return res.status(401).send({ message: 'unauthorized access' })
             }
-            jwt.verify(token, process.env.secret, (err, decoded) => {
+            jwt.verify(token, process.env.SECRET, (err, decoded) => {
                 if (err) {
                     return res.status(401).send({ message: 'unauthorized access' })
                 }
-                req.user = decoded;
+                // console.log(decoded);
+                req.info = decoded;
                 next();
             })
         }
@@ -53,21 +54,22 @@ async function run() {
         const userCollection = client.db('jwt-auth').collection('userData');
 
         app.post('/jwt', async (req, res) => {
-            const { email } = req.body;
+            const info = req.body;
+            // console.log(info);
             const token = jwt.sign({
-                email
-            }, process.env.secret, { expiresIn: '1h' });
+                info
+            }, process.env.SECRET, { expiresIn: '1h' });
             res
                 .cookie('token', token, {
                     httpOnly: true,
-                    secure: false,
-                    sameSite: 'lax'
+                    secure: true,
+                    sameSite: 'none'
                 })
                 .send({ success: true })
         });
 
         app.post('/logout', async (req, res) => {
-            console.log(req.email);
+            // console.log(req.email);
             res
                 .clearCookie('token', {
                     maxAge: 0
@@ -77,7 +79,8 @@ async function run() {
 
 
         app.get('/secret-data', verifyToken, async (req, res) => {
-            if(req?.query?.email !== req?.user?.email){
+            // console.log(req?.info?.info?.email);
+            if(req?.query?.email !== req?.info?.info?.email){
                 return res.status(401).send({ message: 'unauthorized access' })
             }
             const result = await userCollection.find().toArray();
