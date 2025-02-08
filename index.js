@@ -59,7 +59,8 @@ async function run() {
             console.log(findData?.role);
             if (findData?.role === 'admin') {
                 // return res.status(401).send({ message: 'unauthorized access' })
-                next()
+                // console.log('hello i am here');
+                return next()
             }
             // next()
             res.status(401).send({ message: 'unauthorized access' })
