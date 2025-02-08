@@ -50,6 +50,21 @@ async function run() {
             })
         }
 
+        //admin verify token
+        const verifyAdmin = async (req, res, next) => {
+            const info = req?.info?.info?.email;
+            // console.log(info);
+            const findData = await userCollection.findOne({ email: info });
+            // console.log(findData);
+            console.log(findData?.role);
+            if (findData?.role === 'admin') {
+                // return res.status(401).send({ message: 'unauthorized access' })
+                next()
+            }
+            // next()
+            res.status(401).send({ message: 'unauthorized access' })
+        }
+
 
         const userCollection = client.db('jwt-auth').collection('userData');
 
@@ -80,11 +95,21 @@ async function run() {
 
         app.get('/secret-data', verifyToken, async (req, res) => {
             // console.log(req?.info?.info?.email);
-            if(req?.query?.email !== req?.info?.info?.email){
+            if (req?.query?.email !== req?.info?.info?.email) {
                 return res.status(401).send({ message: 'unauthorized access' })
             }
             const result = await userCollection.find().toArray();
             res.send({ messages: "Data get successfully", data: result })
+        });
+
+
+        // admin api 
+        app.get('/admin-api', verifyToken, verifyAdmin, async (req, res) => {
+            const email = req?.info?.info?.email;
+            // console.log(email);
+            const find = await userCollection.findOne({ email });
+            res.send({ message: 'Learing maybe success', data: find })
+
         })
 
 
