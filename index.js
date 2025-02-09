@@ -56,7 +56,7 @@ async function run() {
             // console.log(info);
             const findData = await userCollection.findOne({ email: info });
             // console.log(findData);
-            console.log(findData?.role);
+            // console.log(findData?.role);
             if (findData?.role === 'admin') {
                 // return res.status(401).send({ message: 'unauthorized access' })
                 // console.log('hello i am here');
@@ -106,8 +106,12 @@ async function run() {
 
         // admin api 
         app.get('/admin-api', verifyToken, verifyAdmin, async (req, res) => {
+            console.log(req?.query?.email);
             const email = req?.info?.info?.email;
             // console.log(email);
+            if(req?.query?.email !== req?.info?.info?.email){
+                return res.status(401).send({ message: 'unauthorized access' })
+            }
             const find = await userCollection.findOne({ email });
             res.send({ message: 'Learing maybe success', data: find })
 
